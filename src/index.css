@@ -1,0 +1,55 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    color-scheme: dark;
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    @apply bg-paper font-sans text-ink antialiased;
+    overflow-x: clip;
+  }
+  ::selection {
+    background: rgba(129, 140, 248, 0.35);
+  }
+  :focus-visible {
+    outline: 2px solid #8b93ff;
+    outline-offset: 3px;
+  }
+}
+
+@layer components {
+  .container-x {
+    @apply mx-auto w-full max-w-[1200px] px-6 lg:px-10;
+  }
+  /* Títulos na mesma fonte da logo (Geist), semibold e tracking fechado */
+  /* Fundos de seção: tons de azul muito próximos do fundo da página */
+  .tone-indigo {
+    background:
+      radial-gradient(60% 50% at 85% 0%, rgba(79, 70, 229, 0.07), transparent 70%),
+      linear-gradient(180deg, #0d0f2b 0%, #0c0e28 100%);
+  }
+  .tone-sky {
+    background:
+      radial-gradient(55% 45% at 10% 100%, rgba(56, 120, 220, 0.06), transparent 70%),
+      linear-gradient(180deg, #0b1229 0%, #0a1026 100%);
+  }
+  .tone-navy {
+    background:
+      radial-gradient(60% 50% at 15% 0%, rgba(99, 102, 241, 0.06), transparent 70%),
+      linear-gradient(180deg, #0c0e29 0%, #0b0d26 100%);
+  }
+  .tone-steel {
+    background:
+      radial-gradient(60% 50% at 90% 100%, rgba(56, 120, 220, 0.07), transparent 70%),
+      linear-gradient(180deg, #0b132b 0%, #0a1128 100%);
+  }
+  .h-display {
+    @apply font-sans;
+    font-weight: 600;
+    letter-spacing: -0.035em;
+    line-height: 1.06;
+  }
+}
