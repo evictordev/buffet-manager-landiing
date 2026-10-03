@@ -1,7 +1,7 @@
 import { useRef } from "react";
 import { gsap } from "../lib/gsap";
 import { useScrollAnimations } from "../hooks/useScrollAnimations";
-import { notebookMockup } from "../assets";
+import HeroNotebook3D from "./HeroNotebook3D";
 import Button from "./ui/Button";
 
 export default function Hero() {
@@ -87,15 +87,7 @@ export default function Hero() {
 
           <div className="hero-mock-intro relative">
             <div className="hero-mock-scroll will-change-transform">
-              <img
-                src={notebookMockup.src}
-                width={notebookMockup.width}
-                height={notebookMockup.height}
-                alt={notebookMockup.alt}
-                fetchPriority="high"
-                decoding="async"
-                className="mx-auto h-auto w-full max-w-[640px] drop-shadow-[0_40px_60px_rgba(0,0,0,0.5)] lg:w-full xl:w-[118%] lg:max-w-none"
-              />
+              <HeroNotebook3D />
             </div>
           </div>
         </div>
