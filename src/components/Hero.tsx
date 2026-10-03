@@ -59,7 +59,7 @@ export default function Hero() {
 
             <h1 className="h-display mt-7 text-[clamp(2.5rem,4.1vw,3.9rem)]">
               <span className="block overflow-hidden pb-[0.1em]">
-                <span className="hero-line block">Gestão inteligente</span>
+                <span className="hero-line block">Gestão</span>
               </span>
               <span className="-mt-[0.1em] block overflow-hidden pb-[0.1em]">
                 <span className="hero-line block">para o seu buffet.</span>

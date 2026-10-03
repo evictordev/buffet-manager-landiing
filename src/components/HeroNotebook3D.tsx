@@ -1,9 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import { NotebookScene } from "./three/notebookScene";
-import { shots, notebookMockup } from "../assets";
+import { notebookMockup } from "../assets";
+
+const SCREEN_VIDEO_URL = "/videos/notebook-tour.mp4";
 
 /**
- * Notebook 3D (Three.js) que gira e abre revelando o painel do Buffet Manager.
+ * Notebook 3D (Three.js) que gira e abre revelando o vídeo de apresentação do Buffet Manager.
  * Cai para a captura estática caso WebGL não esteja disponível.
  */
 export default function HeroNotebook3D() {
@@ -25,8 +27,8 @@ export default function HeroNotebook3D() {
 
     const scene = new NotebookScene({
       container,
-      screenTextureUrl: shots.dashboard.src,
-      screenAspect: shots.dashboard.width / shots.dashboard.height,
+      screenVideoUrl: SCREEN_VIDEO_URL,
+      screenAspect: 16 / 9,
       reducedMotion,
     });
 

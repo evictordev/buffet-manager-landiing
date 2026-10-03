@@ -5,7 +5,7 @@ import { gsap } from "../../lib/gsap";
 
 export type NotebookSceneOptions = {
   container: HTMLDivElement;
-  screenTextureUrl: string;
+  screenVideoUrl: string;
   screenAspect: number;
   reducedMotion: boolean;
 };
@@ -35,7 +35,9 @@ export class NotebookScene {
   private floatGroup = new THREE.Group();
   private hinge = new THREE.Group();
   private screenMaterial: THREE.MeshBasicMaterial;
-  private texture: THREE.Texture | null = null;
+  private screenPlane: THREE.Mesh | null = null;
+  private video: HTMLVideoElement | null = null;
+  private videoTexture: THREE.VideoTexture | null = null;
   private envTexture: THREE.Texture | null = null;
 
   private resizeObserver: ResizeObserver;
@@ -90,7 +92,7 @@ export class NotebookScene {
     this.buildLights();
     this.root.add(this.floatGroup);
     this.screenMaterial = this.buildLaptop();
-    this.loadScreenTexture(opts.screenTextureUrl);
+    this.loadScreenVideo(opts.screenVideoUrl);
 
     this.scene.add(this.root);
 
@@ -101,6 +103,10 @@ export class NotebookScene {
     this.intersectionObserver = new IntersectionObserver(
       (entries) => {
         this.isVisible = entries[0]?.isIntersecting ?? true;
+        if (!this.reducedMotion && this.video) {
+          if (this.isVisible) this.video.play().catch(() => {});
+          else this.video.pause();
+        }
       },
       { threshold: 0.05 },
     );
@@ -224,6 +230,7 @@ export class NotebookScene {
     screenPlane.rotation.x = Math.PI / 2;
     screenPlane.position.set(0, -0.011, BOTTOM_MARGIN + screenH / 2);
     this.hinge.add(screenPlane);
+    this.screenPlane = screenPlane;
 
     // Webcam
     const webcam = new THREE.Mesh(
@@ -244,18 +251,47 @@ export class NotebookScene {
     return screenMaterial;
   }
 
-  private loadScreenTexture(url: string) {
-    new THREE.TextureLoader().load(url, (tex) => {
-      if (this.disposed) {
-        tex.dispose();
-        return;
-      }
-      tex.colorSpace = THREE.SRGBColorSpace;
-      tex.anisotropy = this.renderer.capabilities.getMaxAnisotropy();
-      this.texture = tex;
-      this.screenMaterial.map = tex;
-      this.screenMaterial.needsUpdate = true;
-    });
+  private loadScreenVideo(url: string) {
+    const video = document.createElement("video");
+    video.src = url;
+    video.loop = true;
+    video.muted = true;
+    video.playsInline = true;
+    video.preload = "auto";
+    this.video = video;
+
+    const texture = new THREE.VideoTexture(video);
+    texture.colorSpace = THREE.SRGBColorSpace;
+    texture.anisotropy = this.renderer.capabilities.getMaxAnisotropy();
+    this.videoTexture = texture;
+    this.screenMaterial.map = texture;
+    this.screenMaterial.needsUpdate = true;
+
+    video.addEventListener(
+      "loadedmetadata",
+      () => {
+        if (this.disposed || !video.videoWidth || !video.videoHeight) return;
+        this.resizeScreenPlane(video.videoWidth / video.videoHeight);
+        if (this.reducedMotion) {
+          // Decodifica um quadro para exibir uma imagem estática, sem iniciar a reprodução.
+          video.currentTime = Math.min(0.1, video.duration || 0.1);
+        }
+      },
+      { once: true },
+    );
+
+    if (!this.reducedMotion) {
+      video.play().catch(() => {});
+    }
+  }
+
+  private resizeScreenPlane(aspect: number) {
+    if (!this.screenPlane) return;
+    const screenW = W - SIDE_MARGIN * 2;
+    const screenH = screenW / aspect;
+    this.screenPlane.geometry.dispose();
+    this.screenPlane.geometry = new THREE.PlaneGeometry(screenW, screenH);
+    this.screenPlane.position.z = BOTTOM_MARGIN + screenH / 2;
   }
 
   private playIntro() {
@@ -320,7 +356,12 @@ export class NotebookScene {
         materials.forEach((m) => m.dispose());
       }
     });
-    this.texture?.dispose();
+    this.videoTexture?.dispose();
+    if (this.video) {
+      this.video.pause();
+      this.video.removeAttribute("src");
+      this.video.load();
+    }
     this.envTexture?.dispose();
     this.renderer.dispose();
     if (this.renderer.domElement.parentNode === this.container) {
