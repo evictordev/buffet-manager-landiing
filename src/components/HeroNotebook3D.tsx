@@ -42,7 +42,7 @@ export default function HeroNotebook3D() {
         alt={notebookMockup.alt}
         fetchPriority="high"
         decoding="async"
-        className="mx-auto h-auto w-full max-w-[760px] drop-shadow-[0_40px_60px_rgba(0,0,0,0.5)] lg:w-full xl:w-[134%] lg:max-w-none"
+        className="mx-auto h-auto w-full max-w-[760px] drop-shadow-[0_28px_45px_rgba(0,0,0,0.32)] lg:w-full xl:w-[140%] xl:translate-x-[5%] lg:max-w-none"
       />
     );
   }
@@ -52,7 +52,7 @@ export default function HeroNotebook3D() {
       ref={containerRef}
       role="img"
       aria-label={notebookMockup.alt}
-      className="relative mx-auto aspect-[1188/665] w-full max-w-[760px] drop-shadow-[0_40px_60px_rgba(0,0,0,0.5)] lg:w-full xl:w-[134%] lg:max-w-none"
+      className="relative mx-auto aspect-[1188/665] w-full max-w-[760px] drop-shadow-[0_28px_45px_rgba(0,0,0,0.32)] lg:w-full xl:w-[140%] xl:translate-x-[5%] lg:max-w-none"
     />
   );
 }

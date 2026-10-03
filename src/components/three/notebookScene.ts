@@ -11,11 +11,9 @@ export type NotebookSceneOptions = {
 };
 
 // ── Paleta ──────────────────────────────────────────────────────────
-const ALU = 0xd3d5db;
+const ALU = 0xb9bdc4;
 const BEZEL = 0x09090b;
-const TRACKPAD = 0xe6e7ec;
-const ACCENT = 0x8b93ff;
-const EMERALD = 0x10b981;
+const TRACKPAD = 0xbfc3ca;
 
 // ── Dimensões (unidades arbitrárias, proporção ~macbook) ───────────
 const W = 3.4;
@@ -28,64 +26,6 @@ const BOTTOM_MARGIN = 0.1;
 
 const OPEN_ANGLE = -1.832; // ~-105°, inclinação natural de notebook aberto
 
-function makeKeyboardTexture(): THREE.CanvasTexture {
-  const w = 1024;
-  const h = 416;
-  const canvas = document.createElement("canvas");
-  canvas.width = w;
-  canvas.height = h;
-  const ctx = canvas.getContext("2d")!;
-
-  ctx.fillStyle = "#101116";
-  ctx.fillRect(0, 0, w, h);
-
-  const cols = 15;
-  const rows = 5;
-  const pad = 14;
-  const gap = 7;
-  const cellW = (w - pad * 2 - gap * (cols - 1)) / cols;
-  const cellH = (h - pad * 2 - gap * (rows - 1)) / rows;
-
-  const drawKey = (x: number, y: number, kw: number, kh: number) => {
-    const r = 5;
-    ctx.beginPath();
-    ctx.moveTo(x + r, y);
-    ctx.arcTo(x + kw, y, x + kw, y + kh, r);
-    ctx.arcTo(x + kw, y + kh, x, y + kh, r);
-    ctx.arcTo(x, y + kh, x, y, r);
-    ctx.arcTo(x, y, x + kw, y, r);
-    ctx.closePath();
-
-    const grad = ctx.createLinearGradient(x, y, x, y + kh);
-    grad.addColorStop(0, "#2c2e37");
-    grad.addColorStop(1, "#1d1e25");
-    ctx.fillStyle = grad;
-    ctx.fill();
-    ctx.strokeStyle = "rgba(0,0,0,0.55)";
-    ctx.lineWidth = 1.5;
-    ctx.stroke();
-  };
-
-  for (let row = 0; row < rows; row++) {
-    const y = pad + row * (cellH + gap);
-    if (row === rows - 1) {
-      // Linha inferior: espaçadeira larga ao centro
-      drawKey(pad, y, cellW * 2.6, cellH);
-      drawKey(pad + (cellW * 2.6 + gap), y, cellW * 6.2, cellH);
-      drawKey(pad + (cellW * 2.6 + gap) + (cellW * 6.2 + gap), y, cellW * 2.6, cellH);
-      continue;
-    }
-    for (let col = 0; col < cols; col++) {
-      const x = pad + col * (cellW + gap);
-      drawKey(x, y, cellW, cellH);
-    }
-  }
-
-  const texture = new THREE.CanvasTexture(canvas);
-  texture.colorSpace = THREE.SRGBColorSpace;
-  return texture;
-}
-
 export class NotebookScene {
   private container: HTMLDivElement;
   private renderer: THREE.WebGLRenderer;
@@ -94,9 +34,8 @@ export class NotebookScene {
   private root = new THREE.Group();
   private floatGroup = new THREE.Group();
   private hinge = new THREE.Group();
-  private screenMaterial: THREE.MeshStandardMaterial;
+  private screenMaterial: THREE.MeshBasicMaterial;
   private texture: THREE.Texture | null = null;
-  private keyboardTexture: THREE.CanvasTexture | null = null;
   private envTexture: THREE.Texture | null = null;
 
   private resizeObserver: ResizeObserver;
@@ -132,17 +71,20 @@ export class NotebookScene {
     this.renderer.setClearColor(0x000000, 0);
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    this.renderer.toneMappingExposure = 1.05;
+    this.renderer.toneMappingExposure = 0.92;
+    this.renderer.shadowMap.enabled = true;
+    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     this.container.appendChild(this.renderer.domElement);
     this.renderer.domElement.style.cssText = "position:absolute;inset:0;width:100%;height:100%;display:block;";
 
-    this.camera = new THREE.PerspectiveCamera(32, 1, 0.1, 100);
-    this.camera.position.set(0, 1.08, 6.1);
-    this.camera.lookAt(0, 1.02, 0);
+    this.camera = new THREE.PerspectiveCamera(29, 1, 0.1, 100);
+    this.camera.position.set(0, 0.98, 5.35);
+    this.camera.lookAt(0, 0.92, 0);
 
     const pmrem = new THREE.PMREMGenerator(this.renderer);
     this.envTexture = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
     this.scene.environment = this.envTexture;
+    this.scene.environmentIntensity = 0.32;
     pmrem.dispose();
 
     this.buildLights();
@@ -174,43 +116,56 @@ export class NotebookScene {
   }
 
   private buildLights() {
-    const hemi = new THREE.HemisphereLight(0x8890ff, 0x05050f, 0.45);
-    const key = new THREE.DirectionalLight(0xfff7ec, 1.5);
+    const hemi = new THREE.HemisphereLight(0xd5d9e2, 0x181a20, 0.48);
+    const key = new THREE.DirectionalLight(0xfff8ef, 2.1);
     key.position.set(2.6, 4.2, 3.4);
-    const fill = new THREE.DirectionalLight(0xaeb6ff, 0.4);
+    key.castShadow = true;
+    key.shadow.mapSize.set(1024, 1024);
+    key.shadow.camera.left = -4;
+    key.shadow.camera.right = 4;
+    key.shadow.camera.top = 4;
+    key.shadow.camera.bottom = -4;
+    key.shadow.bias = -0.00025;
+    key.shadow.radius = 5;
+    const fill = new THREE.DirectionalLight(0xdce1eb, 0.28);
     fill.position.set(-2.2, 1.6, 2.8);
-    const rim = new THREE.DirectionalLight(ACCENT, 1.2);
+    const rim = new THREE.DirectionalLight(0xc6ccd8, 0.3);
     rim.position.set(-3.2, 2.4, -2.4);
-    const kiss = new THREE.PointLight(EMERALD, 0.7, 6, 2);
-    kiss.position.set(0.6, -0.1, 2.2);
-
-    this.scene.add(hemi, key, fill, rim, kiss);
+    this.scene.add(hemi, key, fill, rim);
+    const ground = new THREE.Mesh(
+      new THREE.PlaneGeometry(200, 200),
+      new THREE.ShadowMaterial({ color: 0x000000, opacity: 0.3 }),
+    );
+    ground.rotation.x = -Math.PI / 2;
+    ground.position.y = -0.095;
+    ground.receiveShadow = true;
+    this.scene.add(ground);
   }
 
-  private buildLaptop(): THREE.MeshStandardMaterial {
+  private buildLaptop(): THREE.MeshBasicMaterial {
     const alu = new THREE.MeshPhysicalMaterial({
       color: ALU,
-      metalness: 0.9,
-      roughness: 0.28,
-      clearcoat: 0.4,
-      clearcoatRoughness: 0.25,
-      envMapIntensity: 1.1,
+      metalness: 0.58,
+      roughness: 0.4,
+      clearcoat: 0.12,
+      clearcoatRoughness: 0.35,
+      envMapIntensity: 0.5,
     });
     const bezel = new THREE.MeshStandardMaterial({ color: BEZEL, roughness: 0.8, metalness: 0.15, envMapIntensity: 0.4 });
-    this.keyboardTexture = makeKeyboardTexture();
     const deck = new THREE.MeshStandardMaterial({
-      map: this.keyboardTexture,
-      roughness: 0.75,
-      metalness: 0.15,
-      envMapIntensity: 0.35,
+      color: 0x303238,
+      roughness: 0.82,
+      metalness: 0.08,
+      envMapIntensity: 0.2,
     });
+    const keycap = new THREE.MeshStandardMaterial({ color: 0x17191e, roughness: 0.82, metalness: 0.02 });
     const trackpad = new THREE.MeshPhysicalMaterial({
       color: TRACKPAD,
-      roughness: 0.15,
-      metalness: 0.2,
-      clearcoat: 0.6,
-      clearcoatRoughness: 0.2,
-      envMapIntensity: 1,
+      roughness: 0.42,
+      metalness: 0.08,
+      clearcoat: 0.12,
+      clearcoatRoughness: 0.4,
+      envMapIntensity: 0.45,
     });
 
     // ── Base ──────────────────────────────────────────────────────
@@ -224,6 +179,23 @@ export class NotebookScene {
     );
     keyboardDeck.position.set(0, BASE_HEIGHT / 2 + 0.013, -BASE_DEPTH * 0.16);
     this.floatGroup.add(keyboardDeck);
+
+    const rows = 4;
+    const cols = 14;
+    const keyW = 0.17;
+    const keyD = 0.17;
+    const gapX = 0.035;
+    const gapZ = 0.045;
+    const startX = -((cols * keyW + (cols - 1) * gapX) / 2);
+    const startZ = -0.69;
+    for (let row = 0; row < rows; row++) {
+      for (let col = 0; col < cols; col++) {
+        const cap = new THREE.Mesh(new RoundedBoxGeometry(keyW, 0.018, keyD, 2, 0.012), keycap);
+        cap.position.set(startX + col * (keyW + gapX), BASE_HEIGHT / 2 + 0.031, startZ + row * (keyD + gapZ));
+        cap.castShadow = true;
+        this.floatGroup.add(cap);
+      }
+    }
 
     const trackpadMesh = new THREE.Mesh(
       new RoundedBoxGeometry(W * 0.3, 0.012, BASE_DEPTH * 0.24, 2, 0.02),
@@ -247,14 +219,7 @@ export class NotebookScene {
 
     const screenW = W - SIDE_MARGIN * 2;
     const screenH = screenW / this.screenAspect;
-    const screenMaterial = new THREE.MeshStandardMaterial({
-      color: 0x000000,
-      emissive: 0xffffff,
-      emissiveIntensity: 1.08,
-      roughness: 0.42,
-      metalness: 0,
-      envMapIntensity: 0.25,
-    });
+    const screenMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff, toneMapped: false });
     const screenPlane = new THREE.Mesh(new THREE.PlaneGeometry(screenW, screenH), screenMaterial);
     screenPlane.rotation.x = Math.PI / 2;
     screenPlane.position.set(0, -0.011, BOTTOM_MARGIN + screenH / 2);
@@ -269,6 +234,13 @@ export class NotebookScene {
     webcam.position.set(0, -0.0095, LID_HEIGHT - 0.045);
     this.hinge.add(webcam);
 
+    this.floatGroup.traverse((object) => {
+      if (object instanceof THREE.Mesh) {
+        object.castShadow = true;
+        object.receiveShadow = true;
+      }
+    });
+
     return screenMaterial;
   }
 
@@ -281,7 +253,7 @@ export class NotebookScene {
       tex.colorSpace = THREE.SRGBColorSpace;
       tex.anisotropy = this.renderer.capabilities.getMaxAnisotropy();
       this.texture = tex;
-      this.screenMaterial.emissiveMap = tex;
+      this.screenMaterial.map = tex;
       this.screenMaterial.needsUpdate = true;
     });
   }
@@ -349,7 +321,6 @@ export class NotebookScene {
       }
     });
     this.texture?.dispose();
-    this.keyboardTexture?.dispose();
     this.envTexture?.dispose();
     this.renderer.dispose();
     if (this.renderer.domElement.parentNode === this.container) {
