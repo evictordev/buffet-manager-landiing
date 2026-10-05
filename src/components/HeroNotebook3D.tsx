@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { NotebookScene } from "./three/notebookScene";
 import { notebookMockup } from "../assets";
 
-const SCREEN_VIDEO_URL = "/videos/notebook-tour.mp4";
+const SCREEN_VIDEO_URL = "/videos/notebook-tour.webm";
 
 /**
  * Notebook 3D (Three.js) que gira e abre revelando o vídeo de apresentação do Buffet Manager.
