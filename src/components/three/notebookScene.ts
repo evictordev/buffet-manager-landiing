@@ -11,9 +11,9 @@ export type NotebookSceneOptions = {
 };
 
 // ── Paleta ──────────────────────────────────────────────────────────
-const ALU = 0xb9bdc4;
-const BEZEL = 0x09090b;
-const TRACKPAD = 0xbfc3ca;
+const ALU = 0xd4d6da;
+const BEZEL = 0x050506;
+const TRACKPAD = 0xd0d2d7;
 
 // ── Dimensões (unidades arbitrárias, proporção ~macbook) ───────────
 const W = 3.4;
@@ -23,6 +23,11 @@ const LID_THICKNESS = 0.09;
 const LID_HEIGHT = BASE_DEPTH;
 const SIDE_MARGIN = 0.075;
 const BOTTOM_MARGIN = 0.1;
+
+// O canvas é maior que o contêiner para que o notebook não seja cortado ao girar/abrir.
+const OVERSCAN_X = 1.5;
+const OVERSCAN_Y = 1.5;
+const BASE_FOV = 29;
 
 const OPEN_ANGLE = -1.832; // ~-105°, inclinação natural de notebook aberto
 
@@ -73,20 +78,20 @@ export class NotebookScene {
     this.renderer.setClearColor(0x000000, 0);
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    this.renderer.toneMappingExposure = 0.92;
+    this.renderer.toneMappingExposure = 1.0;
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     this.container.appendChild(this.renderer.domElement);
-    this.renderer.domElement.style.cssText = "position:absolute;inset:0;width:100%;height:100%;display:block;";
+    this.renderer.domElement.style.cssText = `position:absolute;left:50%;top:50%;width:${OVERSCAN_X * 100}%;height:${OVERSCAN_Y * 100}%;transform:translate(-50%,-50%);display:block;pointer-events:none;`;
 
-    this.camera = new THREE.PerspectiveCamera(29, 1, 0.1, 100);
+    this.camera = new THREE.PerspectiveCamera(BASE_FOV, 1, 0.1, 100);
     this.camera.position.set(0, 0.98, 5.35);
     this.camera.lookAt(0, 0.92, 0);
 
     const pmrem = new THREE.PMREMGenerator(this.renderer);
     this.envTexture = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
     this.scene.environment = this.envTexture;
-    this.scene.environmentIntensity = 0.32;
+    this.scene.environmentIntensity = 1.0;
     pmrem.dispose();
 
     this.buildLights();
@@ -122,7 +127,7 @@ export class NotebookScene {
   }
 
   private buildLights() {
-    const hemi = new THREE.HemisphereLight(0xd5d9e2, 0x181a20, 0.48);
+    const hemi = new THREE.HemisphereLight(0xe3e6ec, 0x1c1e24, 0.3);
     const key = new THREE.DirectionalLight(0xfff8ef, 2.1);
     key.position.set(2.6, 4.2, 3.4);
     key.castShadow = true;
@@ -151,27 +156,27 @@ export class NotebookScene {
   private buildLaptop(): THREE.MeshBasicMaterial {
     const alu = new THREE.MeshPhysicalMaterial({
       color: ALU,
-      metalness: 0.58,
-      roughness: 0.4,
-      clearcoat: 0.12,
-      clearcoatRoughness: 0.35,
-      envMapIntensity: 0.5,
+      metalness: 1.0,
+      roughness: 0.3,
+      clearcoat: 0.25,
+      clearcoatRoughness: 0.22,
+      envMapIntensity: 1.15,
     });
-    const bezel = new THREE.MeshStandardMaterial({ color: BEZEL, roughness: 0.8, metalness: 0.15, envMapIntensity: 0.4 });
+    const bezel = new THREE.MeshStandardMaterial({ color: BEZEL, roughness: 0.35, metalness: 0.2, envMapIntensity: 0.6 });
     const deck = new THREE.MeshStandardMaterial({
-      color: 0x303238,
-      roughness: 0.82,
-      metalness: 0.08,
-      envMapIntensity: 0.2,
+      color: 0x1c1d21,
+      roughness: 0.7,
+      metalness: 0.3,
+      envMapIntensity: 0.35,
     });
-    const keycap = new THREE.MeshStandardMaterial({ color: 0x17191e, roughness: 0.82, metalness: 0.02 });
+    const keycap = new THREE.MeshStandardMaterial({ color: 0x0e0f12, roughness: 0.55, metalness: 0.05, envMapIntensity: 0.5 });
     const trackpad = new THREE.MeshPhysicalMaterial({
       color: TRACKPAD,
-      roughness: 0.42,
-      metalness: 0.08,
-      clearcoat: 0.12,
-      clearcoatRoughness: 0.4,
-      envMapIntensity: 0.45,
+      roughness: 0.3,
+      metalness: 1.0,
+      clearcoat: 0.25,
+      clearcoatRoughness: 0.22,
+      envMapIntensity: 1.1,
     });
 
     // ── Base ──────────────────────────────────────────────────────
@@ -307,10 +312,10 @@ export class NotebookScene {
     this.root.scale.setScalar(0.92);
 
     const tl = gsap.timeline({ delay: 0.15 });
-    tl.to(this.root.rotation, { y: -0.32, duration: 1.7, ease: "power3.out" }, 0)
-      .to(this.root.position, { y: 0, duration: 1.1, ease: "power2.out" }, 0)
-      .to(this.root.scale, { x: 1, y: 1, z: 1, duration: 1.1, ease: "power2.out" }, 0)
-      .to(this.hinge.rotation, { x: OPEN_ANGLE, duration: 1.05, ease: "power2.inOut" }, 0.65);
+    tl.to(this.root.rotation, { y: -0.32, duration: 3.4, ease: "power3.out" }, 0)
+      .to(this.root.position, { y: 0, duration: 2.2, ease: "power2.out" }, 0)
+      .to(this.root.scale, { x: 1, y: 1, z: 1, duration: 2.2, ease: "power2.out" }, 0)
+      .to(this.hinge.rotation, { x: OPEN_ANGLE, duration: 2.6, ease: "power2.inOut" }, 1.3);
   }
 
   private handleResize() {
@@ -318,8 +323,11 @@ export class NotebookScene {
     const width = Math.max(1, rect.width);
     const height = Math.max(1, rect.height);
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.75));
-    this.renderer.setSize(width, height, false);
-    this.camera.aspect = width / height;
+    this.renderer.setSize(width * OVERSCAN_X, height * OVERSCAN_Y, false);
+    this.camera.aspect = (width * OVERSCAN_X) / (height * OVERSCAN_Y);
+    // Mantém o tamanho aparente do notebook igual ao do contêiner, só ampliando o campo de visão.
+    this.camera.fov =
+      (2 * Math.atan(Math.tan((BASE_FOV * Math.PI) / 360) * OVERSCAN_Y) * 180) / Math.PI;
     this.camera.updateProjectionMatrix();
   }
 
