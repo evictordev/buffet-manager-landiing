@@ -2,8 +2,8 @@ import { useRef } from "react";
 import { Gauge, Layers, PanelLeft } from "lucide-react";
 import { gsap } from "../lib/gsap";
 import { useScrollAnimations } from "../hooks/useScrollAnimations";
-import { crops, shots } from "../assets";
-import { BrowserFrame, ScreenCrop, ShotImage } from "./ui/Screens";
+import { phoneMockup, shots } from "../assets";
+import { BrowserFrame, ShotImage } from "./ui/Screens";
 
 const POINTS = [
   {
@@ -55,18 +55,11 @@ export default function PlatformSection() {
       const st = { trigger: ".plat-stage", start: "top bottom", end: "bottom top", scrub: 0.8 };
       gsap.fromTo(".plat-main-wrap", { y: 40 }, { y: -40, ease: "none", scrollTrigger: st });
       gsap.fromTo(".plat-side", { y: 90 }, { y: -50, ease: "none", scrollTrigger: st });
-      gsap.fromTo(".plat-kpi", { y: 140 }, { y: -30, ease: "none", scrollTrigger: st });
       gsap.from(".plat-side", {
         x: -80,
         opacity: 0,
         ease: "none",
         scrollTrigger: { trigger: ".plat-stage", start: "top 55%", end: "top 20%", scrub: true },
-      });
-      gsap.from(".plat-kpi", {
-        x: 80,
-        opacity: 0,
-        ease: "none",
-        scrollTrigger: { trigger: ".plat-stage", start: "top 50%", end: "top 15%", scrub: true },
       });
     }
 
@@ -97,20 +90,20 @@ export default function PlatformSection() {
           <div className="plat-main-wrap">
             <div className="plat-main">
               <BrowserFrame>
-                <ShotImage shot={shots.dashboard} />
+                <ShotImage shot={shots.plataforma} />
               </BrowserFrame>
             </div>
           </div>
 
-          <div className="plat-side absolute -bottom-20 -left-10 hidden w-40 xl:block">
-            <div className="overflow-hidden rounded-xl border border-white/10 shadow-chip">
-              <ScreenCrop shot={shots.utensilios} crop={crops.utSidebar} />
-            </div>
-          </div>
-          <div className="plat-kpi absolute -bottom-12 -right-10 hidden w-80 xl:block">
-            <div className="overflow-hidden rounded-xl border border-white/10 shadow-chip">
-              <ScreenCrop shot={shots.dashboard} crop={crops.dashKpis} />
-            </div>
+          <div className="plat-side absolute -bottom-24 -left-10 hidden w-44 xl:block">
+            <img
+              src={phoneMockup.src}
+              alt={phoneMockup.alt}
+              width={phoneMockup.width}
+              height={phoneMockup.height}
+              loading="lazy"
+              className="h-auto w-full drop-shadow-[0_24px_40px_rgba(0,0,0,0.5)]"
+            />
           </div>
         </div>
 

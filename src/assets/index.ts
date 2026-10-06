@@ -2,6 +2,8 @@ import notebook from "./notebook.webp";
 import login from "./login.webp";
 import dashboard from "./dashboard-perdas.webp";
 import utensilios from "./utensilios.webp";
+import plataforma from "./plataforma.webp";
+import celular from "./celular.webp";
 
 export type Shot = { src: string; width: number; height: number; alt: string };
 
@@ -14,6 +16,12 @@ export const shots = {
     height: 1116,
     alt: "Painel de utensílios e perdas do Buffet Manager, com indicadores e notificações",
   },
+  plataforma: {
+    src: plataforma,
+    width: 2540,
+    height: 926,
+    alt: "Painel de utensílios e perdas do Buffet Manager, com menu lateral, indicadores e gráficos",
+  },
   utensilios: {
     src: utensilios,
     width: 1916,
@@ -21,6 +29,14 @@ export const shots = {
     alt: "Tela de gestão de utensílios do Buffet Manager, com indicadores e tabela de inventário",
   },
 } satisfies Record<string, Shot>;
+
+/** Celular com o painel de vendas e folha de pagamento, sem fundo (440 × 864). */
+export const phoneMockup = {
+  src: celular,
+  width: 440,
+  height: 864,
+  alt: "Celular exibindo o painel de vendas e a folha de pagamento do Buffet Manager",
+};
 
 export type Crop = { x: number; y: number; w: number; h: number };
 
